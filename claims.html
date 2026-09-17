@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Claims - FindIt</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #FAFBFC;
+            --surface: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --brand: #4F46E5;
+            --brand-dark: #4338CA;
+            --brand-light: #EEF2FF;
+            --lost: #EF4444;
+            --lost-light: #FEE2E2;
+            --found: #10B981;
+            --found-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+        }
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        /* --- Navbar --- */
+        .navbar { background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 1rem 0; }
+        .navbar-brand { font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text-primary); }
+        .navbar-brand svg { width: 24px; height: 24px; }
+        .nav-link { color: var(--text-secondary); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; }
+        .nav-link:hover, .nav-link.active { color: var(--brand); background: var(--brand-light); }
+
+        /* User Profile Dropdown */
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.3rem 0.5rem 0.3rem 0.3rem; border-radius: 10px; border: 1px solid var(--border); background: white; transition: 0.2s; }
+        .user-profile:hover { border-color: var(--text-muted); }
+        .user-avatar { width: 32px; height: 32px; background: var(--brand-light); color: var(--brand); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1; }
+        .user-role { font-size: 0.7rem; color: var(--text-muted); line-height: 1; margin-top: 2px; }
+
+        /* --- Buttons --- */
+        .btn-primary-custom, .btn-outline-custom { 
+            display: inline-flex !important; align-items: center; justify-content: center; gap: 0.5rem; 
+            font-weight: 600; padding: 0.65rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.9rem; line-height: 1; white-space: nowrap; text-decoration: none; vertical-align: middle;
+        }
+        .btn-primary-custom svg, .btn-outline-custom svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .btn-primary-custom { background: var(--brand); color: white; border: 1px solid var(--brand); }
+        .btn-primary-custom:hover { background: var(--brand-dark); border-color: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .btn-outline-custom { background: white; color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-outline-custom:hover { border-color: var(--text-muted); background: #F8FAFC; }
+
+        /* --- Layout --- */
+        .dashboard-layout { display: flex; align-items: flex-start; gap: 2rem; padding: 2rem 0; }
+        
+        /* Sidebar */
+        .sidebar-nav { width: 240px; flex-shrink: 0; position: sticky; top: 90px; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav li { margin-bottom: 0.25rem; }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px; color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
+        .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-link:hover { background: white; color: var(--text-primary); }
+        .sidebar-link.active { background: var(--brand); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+
+        /* Main Content */
+        .main-content { flex-grow: 1; min-width: 0; }
+        
+        /* Page Header */
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+        .page-header p { color: var(--text-secondary); margin: 0; font-size: 0.95rem; }
+
+        /* Info Callout */
+        .info-callout { background: #FFFBEB; border: 1px solid #FEF3C7; border-radius: 12px; padding: 1rem 1.25rem; display: flex; gap: 0.75rem; margin-bottom: 2rem; }
+        .info-callout svg { width: 20px; height: 20px; color: #F59E0B; flex-shrink: 0; margin-top: 2px; }
+        .info-callout p { font-size: 0.85rem; color: #92400E; margin: 0; line-height: 1.5; }
+        .info-callout strong { font-weight: 700; }
+
+        /* Claims Table */
+        .claims-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .claims-table { width: 100%; border-collapse: collapse; }
+        .claims-table thead th { background: #F8FAFC; padding: 0.85rem 1.5rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        .claims-table tbody td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        .claims-table tbody tr:last-child td { border-bottom: none; }
+        .claims-table tbody tr:hover { background: #FAFBFC; }
+        
+        .item-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .item-thumb { width: 36px; height: 36px; background: #F1F5F9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .item-thumb svg { width: 18px; height: 18px; opacity: 0.7; }
+        .item-name { font-weight: 600; color: var(--text-primary); }
+        .item-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Status Pills */
+        .status-pill { font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.03em; display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+        .status-pill svg { width: 10px; height: 10px; }
+        .status-pending { background: var(--warning-light); color: var(--warning); }
+        .status-approved { background: var(--found-light); color: var(--found); }
+        .status-rejected { background: var(--lost-light); color: var(--lost); }
+
+        /* Action Icons */
+        .action-icons { display: flex; gap: 0.5rem; }
+        .icon-btn { width: 32px; height: 32px; border-radius: 8px; background: #F8FAFC; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: 0.2s; text-decoration: none; }
+        .icon-btn:hover { background: var(--brand-light); border-color: var(--brand); color: var(--brand); }
+        .icon-btn svg { width: 16px; height: 16px; }
+
+        /* --- Footer --- */
+        footer { padding: 2rem 0; border-top: 1px solid var(--border); background: white; color: var(--text-secondary); font-size: 0.85rem; margin-top: 4rem; }
+        .footer-link { color: var(--text-secondary); text-decoration: none; margin-left: 1.5rem; transition: 0.2s; }
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .sidebar-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/></svg>
+                FindIt
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="dashboard.html">Dashboard</a></li>
+                                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">All Pages</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="index.html">Home</a></li>
+                            <li><a class="dropdown-item" href="browse.html">Browse</a></li>
+                            <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-reports.html">My Reports</a></li>
+                            <li><a class="dropdown-item" href="claims.html">Claims</a></li>
+                            <li><a class="dropdown-item" href="messages.html">Messages</a></li>
+                            <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                            <li><a class="dropdown-item" href="report-item.html">Report Item</a></li>
+                            <li><a class="dropdown-item" href="item-detail.html">Item Detail</a></li>
+                            <li><a class="dropdown-item" href="submit-claim.html">Submit Claim</a></li>
+                            <li><a class="dropdown-item" href="admin.html">Admin Overview</a></li>
+                            <li><a class="dropdown-item" href="admin-users.html">Admin Users</a></li>
+                            <li><a class="dropdown-item" href="admin-disputes.html">Admin Disputes</a></li>
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><a class="dropdown-item" href="forgot-password.html">Forgot Password</a></li>
+                        </ul>
+                    </li>                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <div class="dropdown">
+                            <div class="user-profile" data-bs-toggle="dropdown" role="button">
+                                <div class="user-avatar">SM</div>
+                                <div class="d-none d-lg-block">
+                                    <div class="user-name">Saimon Islam</div>
+                                    <div class="user-role">Registered User</div>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--text-muted);"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2" style="border-radius: 10px; min-width: 180px;">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="dashboard.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--text-secondary);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="2"/></svg> Dashboard</a></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="claims.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--text-secondary);"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> My Claims</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger" href="login.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="container">
+        <div class="dashboard-layout">
+            
+            <!-- Sidebar -->
+            <aside class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                        Overview
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        My Reports
+                    </a></li>
+                    <li><a href="claims.html" class="sidebar-link active">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5V11C4 16.55 7.41 21.69 12 23C16.59 21.69 20 16.55 20 11V5L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                        My Claims
+                    </a></li>
+                    <li><a href="messages.html" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Messages
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+                        Settings
+                    </a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>My Claims</h1>
+                    <p>Track the status of items you have claimed and provide verification if requested.</p>
+                </div>
+
+                <!-- Info Callout -->
+                <div class="info-callout">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                    <p><strong>Verification Required:</strong> For security purposes, finders may request hidden identifiers (e.g., specific scratches, item contents) to verify true ownership before approving your claim.</p>
+                </div>
+
+                <!-- Claims Table -->
+                <div class="claims-card">
+                    <div class="table-responsive">
+                        <table class="claims-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Claim Date</th>
+                                    <th>Finder</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Pending Claim -->
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Black Wallet</div>
+                                                <div class="item-sub">Accessories</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Oct 24, 2023</td>
+                                    <td>Md. Sabbir Mia</td>
+                                    <td>
+                                        <span class="status-pill status-pending">
+                                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <a href="messages.html" class="icon-btn" title="Message Finder">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2"/></svg>
+                                            </a>
+                                            <a href="item-detail.html" class="icon-btn" title="View Item">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Approved Claim -->
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 21V9" stroke="currentColor" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Scientific Calculator</div>
+                                                <div class="item-sub">Electronics</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Oct 20, 2023</td>
+                                    <td>Rakib Hasan</td>
+                                    <td>
+                                        <span class="status-pill status-approved">
+                                            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            Approved
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <a href="messages.html" class="icon-btn" title="Message Finder">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2"/></svg>
+                                            </a>
+                                            <a href="item-detail.html" class="icon-btn" title="View Item">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Rejected Claim -->
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Smartphone (Black)</div>
+                                                <div class="item-sub">Electronics</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Oct 18, 2023</td>
+                                    <td>Admin Office</td>
+                                    <td>
+                                        <span class="status-pill status-rejected">
+                                            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            Rejected
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <a href="item-detail.html" class="icon-btn" title="View Item">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>&copy; 2024 FindIt. Built for Kishoreganj University CSE Lab.</div>
+                <div>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Use</a>
+                    <a href="#" class="footer-link">Contact Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

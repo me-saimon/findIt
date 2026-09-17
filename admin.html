@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - FindIt</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #FAFBFC;
+            --surface: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --brand: #4F46E5;
+            --brand-dark: #4338CA;
+            --brand-light: #EEF2FF;
+            --lost: #EF4444;
+            --lost-light: #FEE2E2;
+            --found: #10B981;
+            --found-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+        }
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        /* --- Navbar --- */
+        .navbar { background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 1rem 0; }
+        .navbar-brand { font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text-primary); }
+        .navbar-brand svg { width: 24px; height: 24px; }
+        .nav-link { color: var(--text-secondary); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; }
+        .nav-link:hover, .nav-link.active { color: var(--brand); background: var(--brand-light); }
+
+        /* User Profile Dropdown */
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.3rem 0.5rem 0.3rem 0.3rem; border-radius: 10px; border: 1px solid var(--border); background: white; transition: 0.2s; }
+        .user-profile:hover { border-color: var(--text-muted); }
+        .user-avatar { width: 32px; height: 32px; background: var(--text-primary); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1; }
+        .user-role { font-size: 0.7rem; color: var(--text-muted); line-height: 1; margin-top: 2px; }
+
+        /* --- Buttons --- */
+        .btn-primary-custom, .btn-outline-custom, .btn-danger-custom, .btn-success-custom { 
+            display: inline-flex !important; align-items: center; justify-content: center; gap: 0.5rem; 
+            font-weight: 600; padding: 0.65rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.9rem; line-height: 1; white-space: nowrap; text-decoration: none; vertical-align: middle;
+        }
+        .btn-primary-custom svg, .btn-outline-custom svg, .btn-danger-custom svg, .btn-success-custom svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .btn-primary-custom { background: var(--brand); color: white; border: 1px solid var(--brand); }
+        .btn-primary-custom:hover { background: var(--brand-dark); border-color: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .btn-outline-custom { background: white; color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-outline-custom:hover { border-color: var(--text-muted); background: #F8FAFC; }
+        .btn-danger-custom { background: var(--lost); color: white; border: 1px solid var(--lost); }
+        .btn-danger-custom:hover { background: #DC2626; border-color: #DC2626; }
+        .btn-success-custom { background: var(--found); color: white; border: 1px solid var(--found); }
+        .btn-success-custom:hover { background: #059669; border-color: #059669; }
+
+        /* --- Layout --- */
+        .admin-layout { display: flex; align-items: flex-start; gap: 2rem; padding: 2rem 0; }
+        
+        /* Sidebar */
+        .sidebar-nav { width: 240px; flex-shrink: 0; position: sticky; top: 90px; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav li { margin-bottom: 0.25rem; }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px; color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
+        .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-link:hover { background: white; color: var(--text-primary); }
+        .sidebar-link.active { background: var(--text-primary); color: white; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
+
+        /* Main Content */
+        .main-content { flex-grow: 1; min-width: 0; }
+        
+        /* Page Header */
+        .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+        .page-header p { color: var(--text-secondary); margin: 0; font-size: 0.95rem; }
+
+        /* Stats Cards */
+        .stat-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; height: 100%; transition: 0.2s; }
+        .stat-card:hover { border-color: #D1D5DB; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-icon svg { width: 22px; height: 22px; }
+        .icon-blue { background: var(--brand-light); color: var(--brand); }
+        .icon-orange { background: var(--warning-light); color: var(--warning); }
+        .icon-red { background: var(--lost-light); color: var(--lost); }
+        .icon-green { background: var(--found-light); color: var(--found); }
+        .stat-info h3 { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0; line-height: 1; }
+        .stat-info p { font-size: 0.8rem; color: var(--text-muted); margin: 0; font-weight: 500; }
+
+        /* Section Headers */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin: 2.5rem 0 1.5rem 0; }
+        .section-header h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+
+        /* Moderation Table */
+        .mod-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .mod-table { width: 100%; border-collapse: collapse; }
+        .mod-table thead th { background: #F8FAFC; padding: 0.85rem 1.5rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        .mod-table tbody td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        .mod-table tbody tr:last-child td { border-bottom: none; }
+        .mod-table tbody tr:hover { background: #FAFBFC; }
+        
+        .item-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .item-thumb { width: 36px; height: 36px; background: #F1F5F9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .item-thumb svg { width: 18px; height: 18px; opacity: 0.7; }
+        .item-name { font-weight: 600; color: var(--text-primary); }
+        .item-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Dispute Resolution Card */
+        .dispute-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .dispute-header { padding: 1.25rem 1.5rem; background: #F8FAFC; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .dispute-header h3 { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; color: var(--lost); }
+        .dispute-header h3 svg { width: 18px; height: 18px; }
+        .dispute-body { display: grid; grid-template-columns: 1fr 1fr; }
+        .dispute-col { padding: 1.5rem; }
+        .dispute-col-left { border-right: 1px solid var(--border); }
+        .dispute-col h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; margin-bottom: 1rem; }
+        .dispute-user { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+        .dispute-avatar { width: 40px; height: 40px; border-radius: 50%; background: #F1F5F9; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .dispute-name { font-weight: 700; font-size: 0.95rem; margin: 0; }
+        .dispute-role { font-size: 0.75rem; color: var(--text-muted); }
+        .dispute-proof { background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem; }
+        .dispute-proof strong { color: var(--text-primary); font-weight: 700; }
+        
+        .dispute-actions { display: flex; gap: 0.75rem; }
+        .dispute-actions button { flex: 1; }
+
+        /* --- Footer --- */
+        footer { padding: 2rem 0; border-top: 1px solid var(--border); background: white; color: var(--text-secondary); font-size: 0.85rem; margin-top: 4rem; }
+        .footer-link { color: var(--text-secondary); text-decoration: none; margin-left: 1.5rem; transition: 0.2s; }
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .sidebar-nav { display: none; }
+            .dispute-body { grid-template-columns: 1fr; }
+            .dispute-col-left { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/></svg>
+                FindIt <span class="badge bg-dark ms-2" style="font-size: 0.6rem; padding: 0.2rem 0.4rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Admin</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html">Browse</a></li>
+                                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">All Pages</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="index.html">Home</a></li>
+                            <li><a class="dropdown-item" href="browse.html">Browse</a></li>
+                            <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-reports.html">My Reports</a></li>
+                            <li><a class="dropdown-item" href="claims.html">Claims</a></li>
+                            <li><a class="dropdown-item" href="messages.html">Messages</a></li>
+                            <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                            <li><a class="dropdown-item" href="report-item.html">Report Item</a></li>
+                            <li><a class="dropdown-item" href="item-detail.html">Item Detail</a></li>
+                            <li><a class="dropdown-item" href="submit-claim.html">Submit Claim</a></li>
+                            <li><a class="dropdown-item" href="admin.html">Admin Overview</a></li>
+                            <li><a class="dropdown-item" href="admin-users.html">Admin Users</a></li>
+                            <li><a class="dropdown-item" href="admin-disputes.html">Admin Disputes</a></li>
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><a class="dropdown-item" href="forgot-password.html">Forgot Password</a></li>
+                        </ul>
+                    </li>                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <div class="dropdown">
+                            <div class="user-profile" data-bs-toggle="dropdown" role="button">
+                                <div class="user-avatar">A</div>
+                                <div class="d-none d-lg-block">
+                                    <div class="user-name">Admin User</div>
+                                    <div class="user-role">Administrator</div>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--text-muted);"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2" style="border-radius: 10px; min-width: 180px;">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="admin.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--text-secondary);"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg> Admin Panel</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger" href="login.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Layout -->
+    <div class="container">
+        <div class="admin-layout">
+            
+            <!-- Sidebar -->
+            <aside class="sidebar-nav">
+                <ul>
+                    <li><a href="admin.html" class="sidebar-link active">
+                        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                        Overview
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                        Moderation
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Disputes
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Users
+                    </a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1>Admin Overview</h1>
+                        <p>Moderate content, resolve disputes, and monitor platform activity.</p>
+                    </div>
+                    <a href="#" class="btn btn-primary-custom">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Export Report
+                    </a>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-blue">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>1,240</h3>
+                                <p>Total Users</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-orange">
+                                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>45</h3>
+                                <p>Pending Approvals</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-red">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>3</h3>
+                                <p>Active Disputes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-green">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>890</h3>
+                                <p>Items Returned</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Moderation -->
+                <div class="section-header">
+                    <h2>Content Moderation</h2>
+                    <a href="#" class="btn btn-outline-custom" style="font-size: 0.85rem; padding: 0.5rem 1rem;">View All</a>
+                </div>
+
+                <div class="mod-card mb-5">
+                    <div class="table-responsive">
+                        <table class="mod-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Reported By</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Black Wallet</div>
+                                                <div class="item-sub">Accessories</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Saimon Islam</td>
+                                    <td>Oct 24, 2023</td>
+                                    <td><span style="font-size: 0.75rem; color: var(--warning); font-weight: 600;">Pending Review</span></td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-success-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Smartphone</div>
+                                                <div class="item-sub">Electronics</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Md. Sabbir Mia</td>
+                                    <td>Oct 24, 2023</td>
+                                    <td><span style="font-size: 0.75rem; color: var(--warning); font-weight: 600;">Pending Review</span></td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-success-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Dispute Resolution -->
+                <div class="section-header">
+                    <h2>Active Dispute Resolution</h2>
+                </div>
+
+                <div class="dispute-card">
+                    <div class="dispute-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Dispute over: Black Leather Wallet
+                        </h3>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Opened: Oct 24, 2023</span>
+                    </div>
+                    <div class="dispute-body">
+                        <!-- Left Col: Claimant -->
+                        <div class="dispute-col dispute-col-left">
+                            <h4>Claimant Request</h4>
+                            <div class="dispute-user">
+                                <div class="dispute-avatar" style="background: var(--brand-light); color: var(--brand);">S</div>
+                                <div>
+                                    <p class="dispute-name">Saimon Islam</p>
+                                    <span class="dispute-role">Claiming Ownership</span>
+                                </div>
+                            </div>
+                            <div class="dispute-proof">
+                                <strong>Proof Provided:</strong><br>
+                                "I lost this wallet on Oct 20th near the library. It has a small star sticker on the bottom right corner. Inside, there should be a photo of my brother and my student ID."
+                            </div>
+                            <div class="dispute-actions">
+                                <button class="btn btn-success-custom">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Approve Claim
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Col: Finder -->
+                        <div class="dispute-col">
+                            <h4>Finder Details</h4>
+                            <div class="dispute-user">
+                                <div class="dispute-avatar" style="background: var(--lost-light); color: var(--lost);">M</div>
+                                <div>
+                                    <p class="dispute-name">Md. Sabbir Mia</p>
+                                    <span class="dispute-role">Found & Holding Item</span>
+                                </div>
+                            </div>
+                            <div class="dispute-proof">
+                                <strong>Finder's Note:</strong><br>
+                                "Found the wallet near the library entrance. Did not check inside for privacy reasons, but there is indeed a star sticker on the bottom right corner as the claimant mentioned."
+                            </div>
+                            <div class="dispute-actions">
+                                <button class="btn btn-danger-custom">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Reject Claim
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>&copy; 2024 FindIt. Built for Kishoreganj University CSE Lab.</div>
+                <div>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Use</a>
+                    <a href="#" class="footer-link">Contact Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

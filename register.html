@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - FindIt</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #FAFBFC;
+            --surface: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --brand: #4F46E5;
+            --brand-dark: #4338CA;
+            --brand-light: #EEF2FF;
+        }
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden; /* Prevent scroll on auth page */
+        }
+
+        /* --- Split Screen Layout --- */
+        .auth-container { height: 100vh; display: flex; }
+        
+        /* Left Brand Panel */
+        .brand-panel {
+            background-color: var(--brand-light);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .brand-panel::before {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 1.25rem; color: var(--text-primary); text-decoration: none; z-index: 2; }
+        .logo svg { width: 24px; height: 24px; }
+
+        .brand-content { z-index: 2; max-width: 400px; margin: 0 auto; text-align: center; }
+        .brand-content h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em; color: var(--brand-dark); }
+        .brand-content p { font-size: 1.1rem; color: var(--text-secondary); margin: 0; }
+        
+        .illustration-wrapper { z-index: 2; text-align: center; margin-top: 2rem; }
+        .illustration-wrapper svg { max-width: 100%; height: auto; filter: drop-shadow(0 20px 30px rgba(79, 70, 229, 0.1)); }
+
+        /* Right Form Panel */
+        .form-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+        .form-wrapper { width: 100%; max-width: 400px; padding: 1rem 0; }
+
+        .form-header { margin-bottom: 2rem; }
+        .form-header h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .form-header p { color: var(--text-secondary); font-size: 0.95rem; margin: 0; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block; }
+        
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-group-custom svg {
+            position: absolute;
+            left: 14px;
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: 0.2s;
+            background-color: #F8FAFC;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--brand);
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Custom Checkbox */
+        .form-check-custom { display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; margin: 1.5rem 0; }
+        .form-check-custom input { display: none; }
+        .check-box {
+            width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; background: white; margin-top: 2px;
+        }
+        .check-box svg { width: 12px; height: 12px; color: white; opacity: 0; transition: 0.2s; }
+        .form-check-custom input:checked + .check-box { background: var(--brand); border-color: var(--brand); }
+        .form-check-custom input:checked + .check-box svg { opacity: 1; }
+        .form-check-custom span { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; line-height: 1.4; }
+        .form-check-custom span a { color: var(--brand); font-weight: 600; text-decoration: none; }
+
+        /* Buttons */
+        .btn-primary-custom { 
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; 
+            width: 100%; background: var(--brand); color: white; border: 1px solid var(--brand); 
+            font-weight: 600; padding: 0.85rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.95rem; cursor: pointer;
+        }
+        .btn-primary-custom:hover { background: var(--brand-dark); border-color: var(--brand-dark); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .btn-primary-custom svg { width: 16px; height: 16px; }
+
+        .divider { text-align: center; margin: 1.5rem 0; position: relative; }
+        .divider::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: var(--border); }
+        .divider span { background: white; padding: 0 1rem; position: relative; color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+
+        .google-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; 
+            width: 100%; background: white; color: var(--text-primary); border: 1px solid var(--border); 
+            font-weight: 600; padding: 0.85rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.95rem; text-decoration: none; cursor: pointer;
+        }
+        .google-btn:hover { background: #F8FAFC; border-color: var(--text-muted); }
+        .google-btn svg { width: 18px; height: 18px; }
+
+        .login-text { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary); }
+        .login-text a { color: var(--brand); font-weight: 700; text-decoration: none; }
+        .login-text a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            body { overflow: auto; height: auto; }
+            .brand-panel { display: none; }
+            .form-panel { height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        
+        <!-- Left Brand Panel -->
+        <div class="brand-panel">
+            <a href="index.html" class="logo">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/></svg>
+                FindIt
+            </a>
+
+            <div class="brand-content">
+                <h1>Join the FindIt network.</h1>
+                <p>Create an account to report lost items, track found belongings, and connect securely with your community.</p>
+                
+                <div class="illustration-wrapper">
+                    <!-- Custom unDraw style illustration: Person holding a found box/item giving it away -->
+                    <svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Background abstract shape -->
+                        <path d="M200 50C280 50 350 100 350 180C350 260 280 280 200 280C120 280 50 260 50 180C50 100 120 50 200 50Z" fill="#FFFFFF" opacity="0.5"/>
+                        
+                        <!-- Floor line -->
+                        <path d="M80 250H320" stroke="#C7D2FE" stroke-width="3" stroke-linecap="round"/>
+                        
+                        <!-- Found Box/Item -->
+                        <rect x="150" y="140" width="80" height="60" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="4"/>
+                        <path d="M150 160H230M190 140V110" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M170 110H210L220 140H160L170 110Z" fill="#4F46E5" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+                        
+                        <!-- Person 1 (Left, Giving) -->
+                        <!-- Legs -->
+                        <path d="M100 250V210M130 250V210" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Body -->
+                        <path d="M90 210C90 210 90 180 115 180C140 180 140 210 140 210" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Arms holding box -->
+                        <path d="M115 180L150 160M115 210L150 180" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Head -->
+                        <circle cx="115" cy="160" r="20" fill="#FFB29A"/>
+                        <path d="M95 155C95 145 105 135 115 135C125 135 135 145 135 155L130 170H100L95 155Z" fill="#0F172A"/>
+                        
+                        <!-- Person 2 (Right, Receiving) -->
+                        <!-- Legs -->
+                        <path d="M270 250V210M300 250V210" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Body -->
+                        <path d="M260 210C260 210 260 180 285 180C310 180 310 210 310 210" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Arms reaching out -->
+                        <path d="M285 180L250 160M285 210L250 180" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+                        <!-- Head -->
+                        <circle cx="285" cy="160" r="20" fill="#FFB29A"/>
+                        <path d="M265 155C265 145 275 135 285 135C295 135 305 145 305 155L300 170H270L265 155Z" fill="#0F172A"/>
+                        
+                        <!-- Floating Success Badge -->
+                        <rect x="300" y="80" width="80" height="50" rx="10" fill="white" stroke="#E2E8F0" stroke-width="2"/>
+                        <circle cx="320" cy="105" r="10" fill="#D1FAE5"/>
+                        <path d="M315 105L319 109L325 101" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="335" y="95" width="35" height="6" rx="3" fill="#0F172A"/>
+                        <rect x="335" y="107" width="25" height="4" rx="2" fill="#94A3B8"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="text-center text-muted small z-index-2">
+                &copy; 2024 FindIt. Kishoreganj University CSE Lab.
+            </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="form-panel">
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <h2>Create an account</h2>
+                    <p>Start reporting and tracking items securely today.</p>
+                </div>
+
+                <form>
+                    <!-- Name Input -->
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-group-custom">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <input type="text" class="form-control-custom" placeholder="John Doe" required>
+                        </div>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-group-custom">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <input type="email" class="form-control-custom" placeholder="you@example.com" required>
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-group-custom">
+                            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <input type="password" class="form-control-custom" placeholder="Create a strong password" required id="passwordInput">
+                            <span class="toggle-password" onclick="togglePassword()">
+                                <svg id="eyeIcon" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <label class="form-check-custom">
+                        <input type="checkbox" required>
+                        <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+                    </label>
+
+                    <!-- Sign Up Button -->
+                    <button type="submit" class="btn-primary-custom">
+                        Create Account
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        <span>OR SIGN UP WITH</span>
+                    </div>
+
+                    <!-- Google Auth Button -->
+                    <a href="#" class="google-btn">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.17-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.27 6.6 2.27 12c0 5.24 3.76 10 10 10c5.28 0 9.52-3.6 9.52-8.9c0-1.1-.44-2-.44-2z" fill="#4285F4"/></svg>
+                        Google
+                    </a>
+                </form>
+
+                <div class="login-text">
+                    Already have an account? <a href="login.html">Log in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vanilla JS for Password Toggle
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>';
+            }
+        }
+    </script>
+</body>
+</html>

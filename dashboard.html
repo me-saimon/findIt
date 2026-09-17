@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FindIt</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #FAFBFC;
+            --surface: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --brand: #4F46E5;
+            --brand-dark: #4338CA;
+            --brand-light: #EEF2FF;
+            --lost: #EF4444;
+            --lost-light: #FEE2E2;
+            --found: #10B981;
+            --found-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+        }
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        /* --- Navbar --- */
+        .navbar { background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 1rem 0; }
+        .navbar-brand { font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text-primary); }
+        .navbar-brand svg { width: 24px; height: 24px; }
+        .nav-link { color: var(--text-secondary); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; }
+        .nav-link:hover, .nav-link.active { color: var(--brand); background: var(--brand-light); }
+
+        /* User Profile Dropdown */
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.3rem 0.5rem 0.3rem 0.3rem; border-radius: 10px; border: 1px solid var(--border); background: white; transition: 0.2s; }
+        .user-profile:hover { border-color: var(--text-muted); }
+        .user-avatar { width: 32px; height: 32px; background: var(--brand-light); color: var(--brand); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1; }
+        .user-role { font-size: 0.7rem; color: var(--text-muted); line-height: 1; margin-top: 2px; }
+
+        /* --- Buttons --- */
+        .btn-primary-custom, .btn-outline-custom { 
+            display: inline-flex !important; align-items: center; justify-content: center; gap: 0.5rem; 
+            font-weight: 600; padding: 0.65rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.9rem; line-height: 1; white-space: nowrap; text-decoration: none; vertical-align: middle;
+        }
+        .btn-primary-custom svg, .btn-outline-custom svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .btn-primary-custom { background: var(--brand); color: white; border: 1px solid var(--brand); }
+        .btn-primary-custom:hover { background: var(--brand-dark); border-color: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .btn-outline-custom { background: white; color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-outline-custom:hover { border-color: var(--text-muted); background: #F8FAFC; }
+
+        /* --- Layout --- */
+        .dashboard-layout { display: flex; align-items: flex-start; gap: 2rem; padding: 2rem 0; }
+        
+        /* Sidebar */
+        .sidebar-nav { width: 240px; flex-shrink: 0; position: sticky; top: 90px; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav li { margin-bottom: 0.25rem; }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px; color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
+        .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-link:hover { background: white; color: var(--text-primary); }
+        .sidebar-link.active { background: var(--brand); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+
+        /* Main Content */
+        .main-content { flex-grow: 1; min-width: 0; }
+        
+        /* Welcome Banner */
+        .welcome-banner { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+        .welcome-text h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+        .welcome-text p { color: var(--text-secondary); margin: 0; font-size: 0.95rem; }
+
+        /* Stats Cards */
+        .stat-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; height: 100%; transition: 0.2s; }
+        .stat-card:hover { border-color: #D1D5DB; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-icon svg { width: 22px; height: 22px; }
+        .icon-blue { background: var(--brand-light); color: var(--brand); }
+        .icon-green { background: var(--found-light); color: var(--found); }
+        .icon-orange { background: var(--warning-light); color: var(--warning); }
+        .stat-info h3 { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0; line-height: 1; }
+        .stat-info p { font-size: 0.8rem; color: var(--text-muted); margin: 0; font-weight: 500; }
+
+        /* Generic Card Header */
+        .card-header-custom { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .card-header-custom h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+        .view-all-link { font-size: 0.8rem; color: var(--brand); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .view-all-link svg { width: 12px; height: 12px; }
+
+        /* Reports Table/List */
+        .reports-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .reports-table { width: 100%; border-collapse: collapse; }
+        .reports-table thead th { background: #F8FAFC; padding: 0.85rem 1.5rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        .reports-table tbody td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        .reports-table tbody tr:last-child td { border-bottom: none; }
+        .reports-table tbody tr:hover { background: #FAFBFC; }
+        
+        .item-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .item-thumb { width: 36px; height: 36px; background: #F1F5F9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .item-thumb svg { width: 18px; height: 18px; opacity: 0.7; }
+        .item-name { font-weight: 600; color: var(--text-primary); }
+        .item-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Status Pills */
+        .status-pill { font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.03em; display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+        .status-pill svg { width: 10px; height: 10px; }
+        .status-lost { background: var(--lost-light); color: var(--lost); }
+        .status-found { background: var(--found-light); color: var(--found); }
+        .status-matched { background: var(--warning-light); color: var(--warning); }
+
+        /* --- Footer --- */
+        footer { padding: 2rem 0; border-top: 1px solid var(--border); background: white; color: var(--text-secondary); font-size: 0.85rem; margin-top: 4rem; }
+        .footer-link { color: var(--text-secondary); text-decoration: none; margin-left: 1.5rem; transition: 0.2s; }
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .sidebar-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/></svg>
+                FindIt
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="dashboard.html">Dashboard</a></li>
+                    <!-- User Profile -->
+                                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">All Pages</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="index.html">Home</a></li>
+                            <li><a class="dropdown-item" href="browse.html">Browse</a></li>
+                            <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-reports.html">My Reports</a></li>
+                            <li><a class="dropdown-item" href="claims.html">Claims</a></li>
+                            <li><a class="dropdown-item" href="messages.html">Messages</a></li>
+                            <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                            <li><a class="dropdown-item" href="report-item.html">Report Item</a></li>
+                            <li><a class="dropdown-item" href="item-detail.html">Item Detail</a></li>
+                            <li><a class="dropdown-item" href="submit-claim.html">Submit Claim</a></li>
+                            <li><a class="dropdown-item" href="admin.html">Admin Overview</a></li>
+                            <li><a class="dropdown-item" href="admin-users.html">Admin Users</a></li>
+                            <li><a class="dropdown-item" href="admin-disputes.html">Admin Disputes</a></li>
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><a class="dropdown-item" href="forgot-password.html">Forgot Password</a></li>
+                        </ul>
+                    </li>                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <div class="dropdown">
+                            <div class="user-profile" data-bs-toggle="dropdown" role="button">
+                                <div class="user-avatar">SM</div>
+                                <div class="d-none d-lg-block">
+                                    <div class="user-name">Saimon Islam</div>
+                                    <div class="user-role">Registered User</div>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--text-muted);"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2" style="border-radius: 10px; min-width: 180px;">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="dashboard.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--text-secondary);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="2"/></svg> Dashboard</a></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--text-secondary);"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger" href="login.html" style="font-size: 0.9rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="container">
+        <div class="dashboard-layout">
+            
+            <!-- Sidebar -->
+            <aside class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="sidebar-link active">
+                        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                        Overview
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        My Reports
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5V11C4 16.55 7.41 21.69 12 23C16.59 21.69 20 16.55 20 11V5L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                        My Claims
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Messages
+                    </a></li>
+                    <li><a href="#" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+                        Settings
+                    </a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div class="welcome-text">
+                        <h1>Welcome back, Saimon!</h1>
+                        <p>Here's what's happening with your reports today.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-custom">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5V11C4 16.55 7.41 21.69 12 23C16.59 21.69 20 16.55 20 11V5L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                            Report Found
+                        </a>
+                        <a href="#" class="btn btn-primary-custom">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Report Lost
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-blue">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>14</h3>
+                                <p>Total Reports</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-orange">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>3</h3>
+                                <p>Smart Matches</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-green">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3>8</h3>
+                                <p>Items Returned</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reports Table -->
+                <div class="card-header-custom mt-4">
+                    <h2>Recent Reports</h2>
+                    <a href="#" class="view-all-link">
+                        View All
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+
+                <div class="reports-card">
+                    <div class="table-responsive">
+                        <table class="reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Black Wallet</div>
+                                                <div class="item-sub">Lost Item</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Accessories</td>
+                                    <td>Oct 24, 2023</td>
+                                    <td><span class="status-pill status-matched"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> Matched</span></td>
+                                    <td><a href="item-detail.html" class="btn btn-outline-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">View Details</a></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Smartphone</div>
+                                                <div class="item-sub">Found Item</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Electronics</td>
+                                    <td>Oct 22, 2023</td>
+                                    <td><span class="status-pill status-found"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> Found</span></td>
+                                    <td><a href="item-detail.html" class="btn btn-outline-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">View Details</a></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="item-name">Student ID Card</div>
+                                                <div class="item-sub">Lost Item</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Documents</td>
+                                    <td>Oct 20, 2023</td>
+                                    <td><span class="status-pill status-lost"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> Lost</span></td>
+                                    <td><a href="item-detail.html" class="btn btn-outline-custom" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">View Details</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>&copy; 2024 FindIt. Built for Kishoreganj University CSE Lab.</div>
+                <div>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Use</a>
+                    <a href="#" class="footer-link">Contact Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

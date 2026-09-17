@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Items - FindIt</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #FAFBFC;
+            --surface: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --brand: #4F46E5;
+            --brand-dark: #4338CA;
+            --brand-light: #EEF2FF;
+            --lost: #EF4444;
+            --lost-light: #FEE2E2;
+            --found: #10B981;
+            --found-light: #D1FAE5;
+        }
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+        }
+        .navbar-brand { font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text-primary); }
+        .navbar-brand svg { width: 24px; height: 24px; }
+        .nav-link { color: var(--text-secondary); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; }
+        .nav-link:hover, .nav-link.active { color: var(--brand); background: var(--brand-light); }
+
+        /* --- Buttons --- */
+        .btn-primary-custom, .btn-outline-custom, .btn-light-custom { 
+            display: inline-flex !important; align-items: center; justify-content: center; gap: 0.5rem; 
+            font-weight: 600; padding: 0.65rem 1.25rem; border-radius: 10px; transition: 0.2s; 
+            font-size: 0.9rem; line-height: 1; white-space: nowrap; text-decoration: none; vertical-align: middle;
+        }
+        .btn-primary-custom svg, .btn-outline-custom svg, .btn-light-custom svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .btn-primary-custom { background: var(--brand); color: white; border: 1px solid var(--brand); }
+        .btn-primary-custom:hover { background: var(--brand-dark); border-color: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .btn-outline-custom { background: white; color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-outline-custom:hover { border-color: var(--text-muted); background: #F8FAFC; }
+
+        /* --- Page Header --- */
+        .page-header { padding: 3rem 0 2rem; }
+        .page-header h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-secondary); font-size: 1.1rem; margin: 0; }
+
+        /* --- Layout & Sidebar --- */
+        .sidebar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+        }
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+        .sidebar-title svg { width: 20px; height: 20px; color: var(--brand); }
+
+        .filter-group { margin-bottom: 2rem; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-label {
+            display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-primary); 
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;
+        }
+
+        /* Custom Checkboxes */
+        .form-check-custom { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; cursor: pointer; }
+        .form-check-custom input { display: none; }
+        .check-box {
+            width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;
+        }
+        .check-box svg { width: 12px; height: 12px; color: white; opacity: 0; transition: 0.2s; }
+        .form-check-custom input:checked + .check-box { background: var(--brand); border-color: var(--brand); }
+        .form-check-custom input:checked + .check-box svg { opacity: 1; }
+        .form-check-custom span { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+        .form-check-custom input:checked + .check-box + span { color: var(--text-primary); font-weight: 600; }
+
+        .search-bar-mini {
+            background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .search-bar-mini svg { width: 16px; height: 16px; color: var(--text-muted); margin-left: 0.25rem; }
+        .search-bar-mini input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.9rem; font-weight: 500; }
+
+        /* --- Main Content Toolbar --- */
+        .toolbar {
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .result-count { font-size: 0.95rem; color: var(--text-secondary); font-weight: 500; }
+        .result-count span { color: var(--text-primary); font-weight: 700; }
+        
+        .sort-dropdown {
+            background: white; border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 1rem;
+            font-size: 0.9rem; font-weight: 600; color: var(--text-primary); display: inline-flex; align-items: center; gap: 0.5rem;
+            cursor: pointer;
+        }
+        .sort-dropdown svg { width: 14px; height: 14px; }
+
+        /* --- Item Cards --- */
+        .item-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: 0.3s; height: 100%; }
+        .item-card:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.06); border-color: #D1D5DB; }
+        .item-img-wrapper { height: 180px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--border); }
+        .item-img-wrapper svg { width: 56px; height: 56px; opacity: 0.8; } 
+        
+        .status-badge { position: absolute; top: 12px; right: 12px; font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.6rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.03em; color: white; display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+        .status-badge svg { width: 10px; height: 10px; } 
+        .badge-lost { background: var(--lost); }
+        .badge-found { background: var(--found); }
+        
+        .item-body { padding: 1.25rem; }
+        .item-cat { font-size: 0.7rem; color: var(--brand); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .item-title { font-size: 1.05rem; font-weight: 700; margin: 0.3rem 0 1rem 0; }
+        .item-meta { display: flex; flex-direction: column; gap: 0.6rem; }
+        .meta-row { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem; line-height: 1.2; }
+        .meta-row svg { width: 13px; height: 13px; color: var(--text-muted); flex-shrink: 0; stroke-width: 1.5; } 
+
+        /* --- Pagination --- */
+        .pagination-container { display: flex; justify-content: center; margin-top: 3rem; }
+        .page-btn {
+            width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border); background: white; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;
+            margin: 0 0.25rem; transition: 0.2s; text-decoration: none;
+        }
+        .page-btn:hover { border-color: var(--brand); color: var(--brand); }
+        .page-btn.active { background: var(--brand); border-color: var(--brand); color: white; }
+        .page-btn svg { width: 16px; height: 16px; }
+
+        /* --- Footer --- */
+        footer { padding: 2rem 0; border-top: 1px solid var(--border); background: white; color: var(--text-secondary); font-size: 0.85rem; margin-top: 4rem; }
+        .footer-link { color: var(--text-secondary); text-decoration: none; margin-left: 1.5rem; transition: 0.2s; }
+        .footer-link:hover { color: var(--text-primary); }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/></svg>
+                FindIt
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="browse.html">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link" href="report-item.html">How it Works</a></li>
+                                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">All Pages</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="index.html">Home</a></li>
+                            <li><a class="dropdown-item" href="browse.html">Browse</a></li>
+                            <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-reports.html">My Reports</a></li>
+                            <li><a class="dropdown-item" href="claims.html">Claims</a></li>
+                            <li><a class="dropdown-item" href="messages.html">Messages</a></li>
+                            <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                            <li><a class="dropdown-item" href="report-item.html">Report Item</a></li>
+                            <li><a class="dropdown-item" href="item-detail.html">Item Detail</a></li>
+                            <li><a class="dropdown-item" href="submit-claim.html">Submit Claim</a></li>
+                            <li><a class="dropdown-item" href="admin.html">Admin Overview</a></li>
+                            <li><a class="dropdown-item" href="admin-users.html">Admin Users</a></li>
+                            <li><a class="dropdown-item" href="admin-disputes.html">Admin Disputes</a></li>
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><a class="dropdown-item" href="forgot-password.html">Forgot Password</a></li>
+                        </ul>
+                    </li>                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <a href="login.html" class="btn btn-outline-custom w-100 w-lg-auto">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Login
+                        </a>
+                    </li>
+                    <li class="nav-item mt-2 mt-lg-0">
+                        <a href="register.html" class="btn btn-primary-custom w-100 w-lg-auto">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM20 8v6M17 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Sign Up
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Browse Items</h1>
+            <p>Search through the database of reported lost and found items.</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="container pb-5">
+        <div class="row g-4">
+            
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3">
+                <div class="sidebar">
+                    <div class="sidebar-title">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M22 3H2v18h20V3zM6 3v18M18 3v18M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Filters
+                    </div>
+
+                    <!-- Search Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Keyword</label>
+                        <div class="search-bar-mini">
+                            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <input type="text" placeholder="Search keyword...">
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <label class="form-check-custom">
+                            <input type="checkbox" checked>
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>All Items</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Lost Items</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Found Items</span>
+                        </label>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Electronics</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Documents/IDs</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Accessories</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Keys</span>
+                        </label>
+                        <label class="form-check-custom">
+                            <input type="checkbox">
+                            <span class="check-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                            <span>Others</span>
+                        </label>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Date Range</label>
+                        <div class="mb-2">
+                            <input type="date" class="form-control form-control-sm" style="border-radius: 8px; border-color: var(--border); font-size: 0.85rem;">
+                        </div>
+                        <div>
+                            <input type="date" class="form-control form-control-sm" style="border-radius: 8px; border-color: var(--border); font-size: 0.85rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-custom w-100 mt-2">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div class="col-lg-9">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="result-count">Showing <span>1-9</span> of <span>124</span> results</div>
+                    <div class="sort-dropdown">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        Sort by: Newest
+                        <svg viewBox="0 0 24 24" fill="none" style="margin-left: 4px;"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Item 1 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><rect x="15" y="30" width="70" height="40" rx="6" fill="#E2E8F0"/><rect x="22" y="40" width="16" height="20" rx="2" fill="#94A3B8"/><rect x="42" y="42" width="35" height="4" rx="2" fill="#94A3B8"/><rect x="42" y="52" width="25" height="4" rx="2" fill="#CBD5E1"/></svg>
+                                <span class="status-badge badge-found">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Found
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Documents</span>
+                                <h5 class="item-title">Student ID Card</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Arts Building, Room 204
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        2 hours ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><path d="M30 35C30 25 40 20 50 20C60 20 70 25 70 35V75H30V35Z" fill="#E2E8F0"/><rect x="42" y="45" width="16" height="20" rx="3" fill="#94A3B8"/><circle cx="50" cy="35" r="4" fill="#94A3B8"/></svg>
+                                <span class="status-badge badge-lost">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Lost
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Accessories</span>
+                                <h5 class="item-title">Black Nike Backpack</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Central Library, 2nd Floor
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        5 hours ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><rect x="35" y="20" width="30" height="60" rx="6" fill="#E2E8F0"/><rect x="40" y="25" width="20" height="45" rx="2" fill="#94A3B8"/><circle cx="50" cy="74" r="2" fill="#94A3B8"/></svg>
+                                <span class="status-badge badge-lost">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Lost
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Electronics</span>
+                                <h5 class="item-title">Smartphone (Black)</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Parking Lot B
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        1 day ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><rect x="25" y="35" width="50" height="30" rx="4" fill="#E2E8F0"/><circle cx="35" cy="50" r="3" fill="#94A3B8"/><circle cx="65" cy="50" r="3" fill="#94A3B8"/><path d="M40 65L35 75M60 65L65 75" stroke="#94A3B8" stroke-width="2"/></svg>
+                                <span class="status-badge badge-found">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Found
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Electronics</span>
+                                <h5 class="item-title">Wireless Headphones</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Cafeteria
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        1 day ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 5 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="20" fill="#E2E8F0"/><circle cx="50" cy="50" r="10" fill="#94A3B8"/></svg>
+                                <span class="status-badge badge-lost">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Lost
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Keys</span>
+                                <h5 class="item-title">Set of Car Keys</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Gym Entrance
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        2 days ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 6 -->
+                    <div class="col-xl-4 col-md-6">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                <svg viewBox="0 0 100 100" fill="none"><path d="M40 20H60V30H40zM30 30H70V80H30zM50 45V65M40 55H60" stroke="#94A3B8" stroke-width="2" fill="#E2E8F0"/></svg>
+                                <span class="status-badge badge-found">
+                                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Found
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">Others</span>
+                                <h5 class="item-title">Insulated Water Bottle</h5>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+                                        Science Block
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        3 days ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <a href="#" class="page-btn">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <a href="#" class="page-btn active">1</a>
+                    <a href="#" class="page-btn">2</a>
+                    <a href="#" class="page-btn">3</a>
+                    <a href="#" class="page-btn">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>&copy; 2024 FindIt. Built for Kishoreganj University CSE Lab.</div>
+                <div>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Use</a>
+                    <a href="#" class="footer-link">Contact Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
