@@ -1,0 +1,214 @@
+@model FindIt.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "FindIt - Smart Lost & Found Platform";
+}
+
+<!-- Hero Section -->
+<section class="py-5 pattern-grid border-bottom">
+    <div class="container py-lg-4 text-center">
+        <span class="badge bg-white text-primary border px-3 py-2 rounded-pill fw-semibold shadow-sm mb-3">
+            🎯 Smart Campus & Office Lost & Found
+        </span>
+        <h1 class="display-4 fw-extrabold mb-3 tracking-tight">
+            Lost Something? <span style="color: var(--brand);">Find It Faster.</span>
+        </h1>
+        <p class="lead text-secondary mx-auto mb-4" style="max-width: 680px;">
+            A centralized platform powered by smart matching. Report missing belongings, search verified listings, and safely recover your items.
+        </p>
+
+        <!-- Quick Search Bar -->
+        <div class="mx-auto mb-4" style="max-width: 580px;">
+            <form asp-controller="Items" asp-action="Browse" method="get" class="d-flex gap-2 p-2 bg-white rounded-4 shadow-sm border">
+                <input type="text" name="search" class="form-control border-0 shadow-none px-3" placeholder="Search wallets, IDs, keys, headphones..." />
+                <button type="submit" class="btn-primary-custom px-4">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a asp-controller="Items" asp-action="Create" asp-route-type="0" class="btn-danger-custom px-4 py-2">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Report Lost Item
+            </a>
+            <a asp-controller="Items" asp-action="Create" asp-route-type="1" class="btn-success-custom px-4 py-2">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Report Found Item
+            </a>
+            <a asp-controller="Items" asp-action="Browse" class="btn-outline-custom px-4 py-2">
+                Browse All Items &rarr;
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="py-4 bg-white border-bottom">
+    <div class="container">
+        <div class="row text-center g-3">
+            <div class="col-md-4">
+                <div class="p-2">
+                    <h3 class="fw-bold mb-0 text-danger">@Model.TotalLost</h3>
+                    <span class="text-muted small fw-semibold text-uppercase">Lost Items Reported</span>
+                </div>
+            </div>
+            <div class="col-md-4 border-start border-end">
+                <div class="p-2">
+                    <h3 class="fw-bold mb-0 text-success">@Model.TotalFound</h3>
+                    <span class="text-muted small fw-semibold text-uppercase">Found Items Listed</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-2">
+                    <h3 class="fw-bold mb-0 text-primary">@Model.TotalResolved</h3>
+                    <span class="text-muted small fw-semibold text-uppercase">Belongings Reunited</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Items Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-primary fw-bold text-uppercase small letter-spacing">Latest Activity</span>
+                <h2 class="fw-bold mb-0">Recently Reported Items</h2>
+            </div>
+            <a asp-controller="Items" asp-action="Browse" class="text-decoration-none fw-semibold">View All Items &rarr;</a>
+        </div>
+
+        <div class="row g-4">
+            @if (Model.RecentItems.Any())
+            {
+                @foreach (var item in Model.RecentItems)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="item-card">
+                            <div class="item-img-wrapper">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Title" />
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="3" width="18" height="18" rx="4" stroke="#CBD5E1" stroke-width="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5" fill="#CBD5E1"/>
+                                        <path d="M21 15l-5-5L5 21" stroke="#CBD5E1" stroke-width="2"/>
+                                    </svg>
+                                }
+                                <span class="status-badge @(item.Type == FindIt.Models.ItemType.Lost ? "badge-lost" : "badge-found")">
+                                    @(item.Type == FindIt.Models.ItemType.Lost ? "LOST" : "FOUND")
+                                </span>
+                            </div>
+                            <div class="item-body">
+                                <span class="item-cat">@item.Category?.Name</span>
+                                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="item-title">
+                                    @item.Title
+                                </a>
+                                <div class="item-meta">
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 21C16 17 20 13 20 9A8 8 0 1 0 4 9C4 13 8 17 12 21Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+                                        <span class="text-truncate">@item.Location</span>
+                                    </div>
+                                    <div class="meta-row">
+                                        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2"/></svg>
+                                        <span>@item.DateLostOrFound.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                                    <span class="status-pill @(item.Status == FindIt.Models.ItemStatus.Open ? "status-pending" : "status-approved")">
+                                        @item.Status
+                                    </span>
+                                    <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        Details &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No items reported yet. Be the first to report an item!</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container py-lg-4 text-center">
+        <span class="text-primary fw-bold text-uppercase small letter-spacing">Simple & Secure Workflow</span>
+        <h2 class="fw-bold mb-5">How FindIt Works</h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100 border">
+                    <div class="upload-icon mb-3 bg-white text-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <h5 class="fw-bold mb-2">1. Report an Item</h5>
+                    <p class="text-secondary small mb-0">
+                        Post details about what you lost or found, including date, location, category, and an optional secret verification detail.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100 border">
+                    <div class="upload-icon mb-3 bg-white text-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <h5 class="fw-bold mb-2">2. Smart Matching</h5>
+                    <p class="text-secondary small mb-0">
+                        Our weighted algorithm pairs lost reports with found listings based on category, date proximity, location, and keywords.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100 border">
+                    <div class="upload-icon mb-3 bg-white text-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                    </div>
+                    <h5 class="fw-bold mb-2">3. Verified Claim</h5>
+                    <p class="text-secondary small mb-0">
+                        True owners confirm identity by answering the secret question or providing proof of ownership before items are returned.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="text-primary fw-bold text-uppercase small letter-spacing">Explore</span>
+            <h2 class="fw-bold">Browse by Category</h2>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a asp-controller="Items" asp-action="Browse" asp-route-categoryId="@cat.Id" class="text-decoration-none text-dark">
+                        <div class="p-3 bg-white border rounded-3 h-100 d-flex justify-content-between align-items-center hover-shadow">
+                            <div>
+                                <h6 class="fw-bold mb-1">@cat.Name</h6>
+                                <span class="text-muted small">@cat.Items.Count items</span>
+                            </div>
+                            <span class="text-muted">&rarr;</span>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>

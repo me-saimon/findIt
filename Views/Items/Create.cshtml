@@ -1,0 +1,140 @@
+@model FindIt.Models.ViewModels.ReportItemViewModel
+@{
+    ViewData["Title"] = "Report Item";
+}
+
+<div class="container py-4" style="max-width: 800px;">
+    <!-- Breadcrumbs -->
+    <nav class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Items" asp-action="Browse">Browse</a></li>
+            <li class="breadcrumb-item active">Report Item</li>
+        </ol>
+    </nav>
+
+    <div class="page-header mb-4">
+        <h1 class="fw-bold mb-1">Report an Item</h1>
+        <p class="text-secondary">Provide accurate details to help reunite belongings with their true owners.</p>
+    </div>
+
+    <div class="form-card">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Lost vs Found Toggle -->
+            <div class="status-toggle mb-4">
+                <button type="button" class="toggle-btn @(Model.Type == FindIt.Models.ItemType.Lost ? "active lost" : "")" 
+                        onclick="setItemType(0, this)">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    I Lost an Item
+                </button>
+                <button type="button" class="toggle-btn @(Model.Type == FindIt.Models.ItemType.Found ? "active found" : "")" 
+                        onclick="setItemType(1, this)">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    I Found an Item
+                </button>
+            </div>
+            <input type="hidden" asp-for="Type" id="itemTypeInput" />
+
+            <!-- Title -->
+            <div class="form-group">
+                <label asp-for="Title" class="form-label">
+                    Item Title <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Title" class="form-control-custom" placeholder="e.g., Apple iPhone 14 Pro, Blue Water Bottle, Brown Leather Wallet" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <!-- Category & Location Grid -->
+            <div class="row g-3">
+                <div class="col-md-6 form-group">
+                    <label asp-for="CategoryId" class="form-label">
+                        Category <span class="text-danger">*</span>
+                    </label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control-custom">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="DateLostOrFound" class="form-label">
+                        Date Lost or Found <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="DateLostOrFound" class="form-control-custom" type="date" />
+                    <span asp-validation-for="DateLostOrFound" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+                <label asp-for="Location" class="form-label">
+                    Location Specifics <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Location" class="form-control-custom" placeholder="e.g., Central Library 2nd Floor, Cafeteria Table 5, Bus Stop B" />
+                <span asp-validation-for="Location" class="text-danger small"></span>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label asp-for="Description" class="form-label">
+                    Detailed Description <span class="text-danger">*</span>
+                </label>
+                <textarea asp-for="Description" class="form-control-custom" rows="4" placeholder="Describe unique features, condition, brands, distinguishing marks..."></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <!-- Secret Identifier / Ownership Question -->
+            <div class="form-group" id="secretQuestionGroup">
+                <label asp-for="SecretIdentifier" class="form-label">
+                    Secret Verification Question / Hidden Detail (Optional)
+                </label>
+                <input asp-for="SecretIdentifier" class="form-control-custom" placeholder="e.g., What photo is on the lock screen? What is carved on the back?" />
+                <small class="text-muted d-block mt-1">
+                    For found items, you can specify a secret detail that only the true owner would know to prevent fraudulent claims.
+                </small>
+            </div>
+
+            <!-- Photo Upload -->
+            <div class="form-group mb-4">
+                <label class="form-label">Upload Photo (Optional)</label>
+                <label class="upload-area w-100 d-block mb-0" for="imageFileInput">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="upload-title" id="uploadStatusText">Click or drag image file here</div>
+                    <div class="upload-formats">JPG, PNG, WEBP up to 5MB</div>
+                    <input type="file" asp-for="ImageFile" id="imageFileInput" class="d-none" accept="image/*" onchange="updateFileLabel(this)" />
+                </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                <a asp-controller="Home" asp-action="Index" class="btn-outline-custom">Cancel</a>
+                <button type="submit" class="btn-primary-custom px-4">Publish Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function setItemType(typeVal, btn) {
+            document.getElementById('itemTypeInput').value = typeVal;
+            document.querySelectorAll('.toggle-btn').forEach(b => {
+                b.classList.remove('active', 'lost', 'found');
+            });
+            if (typeVal === 0) {
+                btn.classList.add('active', 'lost');
+            } else {
+                btn.classList.add('active', 'found');
+            }
+        }
+
+        function updateFileLabel(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('uploadStatusText').innerText = "Selected: " + input.files[0].name;
+            }
+        }
+    </script>
+}

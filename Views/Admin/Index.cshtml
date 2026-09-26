@@ -1,0 +1,142 @@
+@model FindIt.Models.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Overview";
+}
+
+<div class="container py-4">
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar-nav">
+            <ul>
+                <li><a asp-controller="Admin" asp-action="Index" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                    Overview
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Users" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/></svg>
+                    Users
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Disputes" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/></svg>
+                    Disputes
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke="currentColor" stroke-width="2"/></svg>
+                    User View
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header mb-4">
+                <h1 class="fw-bold mb-1">Administration Overview</h1>
+                <p class="text-secondary">Campus Lost & Found platform metrics, moderation, and dispute status.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.TotalUsers</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.TotalItems</h3>
+                            <p>Reported Items</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.PendingClaims</h3>
+                            <p>Pending Claims</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-red">
+                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.ActiveDisputes</h3>
+                            <p>Active Disputes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reports Moderation Table -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Recent Submissions for Moderation</h4>
+                    <a asp-controller="Items" asp-action="Browse" class="small fw-semibold text-decoration-none">Browse All &rarr;</a>
+                </div>
+
+                <div class="mod-card">
+                    <table class="mod-table">
+                        <thead>
+                            <tr>
+                                <th>Item Title</th>
+                                <th>Reporter</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.RecentItems)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="fw-semibold text-dark text-decoration-none">
+                                            @item.Title
+                                        </a>
+                                        <div class="small text-muted">@item.Location</div>
+                                    </td>
+                                    <td>
+                                        <div>@item.User?.FullName</div>
+                                        <div class="small text-muted">@item.User?.Email</div>
+                                    </td>
+                                    <td>@item.Category?.Name</td>
+                                    <td>
+                                        <span class="badge @(item.Type == FindIt.Models.ItemType.Lost ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success")">
+                                            @item.Type
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-pill status-@item.Status.ToString().ToLower()">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <form asp-controller="Items" asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Remove this listing?');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

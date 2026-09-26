@@ -1,0 +1,119 @@
+@model List<FindIt.Models.Item>
+@{
+    ViewData["Title"] = "My Reports";
+}
+
+<div class="container py-4">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav">
+            <ul>
+                <li><a asp-controller="Dashboard" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                    Dashboard
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="MyReports" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/></svg>
+                    My Reports
+                </a></li>
+                <li><a asp-controller="Claims" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                    My Claims
+                </a></li>
+                <li><a asp-controller="Messages" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2"/></svg>
+                    Messages
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="Settings" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+                    Settings
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h1 class="fw-bold mb-1">My Reported Items</h1>
+                    <p class="text-secondary mb-0">Manage all items you have reported as lost or found.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Items" asp-action="Create" asp-route-type="0" class="btn-danger-custom">Report Lost</a>
+                    <a asp-controller="Items" asp-action="Create" asp-route-type="1" class="btn-success-custom">Report Found</a>
+                </div>
+            </div>
+
+            <div class="reports-card">
+                @if (Model.Any())
+                {
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Claims</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="item-cell">
+                                            <div class="item-thumb">
+                                                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#CBD5E1" stroke-width="2"/><path d="M21 15l-5-5L5 21" stroke="#CBD5E1" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="item-name text-decoration-none">
+                                                    @item.Title
+                                                </a>
+                                                <div class="item-sub">@item.Category?.Name</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(item.Type == FindIt.Models.ItemType.Lost ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success")">
+                                            @item.Type
+                                        </span>
+                                    </td>
+                                    <td>@item.Location</td>
+                                    <td>@item.DateLostOrFound.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.Claims.Count</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-pill status-@item.Status.ToString().ToLower()">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                View
+                                            </a>
+                                            <form asp-controller="Items" asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Delete this report?');" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="p-5 text-center">
+                        <p class="text-muted mb-3">You have not reported any items yet.</p>
+                        <a asp-controller="Items" asp-action="Create" class="btn-primary-custom">Report Your First Item</a>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+</div>

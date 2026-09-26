@@ -1,0 +1,171 @@
+@model List<FindIt.Models.Dispute>
+@{
+    ViewData["Title"] = "Dispute Resolution";
+    var activeDispute = ViewBag.ActiveDispute as FindIt.Models.Dispute;
+}
+
+<div class="container py-4">
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar-nav">
+            <ul>
+                <li><a asp-controller="Admin" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                    Overview
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Users" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/></svg>
+                    Users
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Disputes" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/></svg>
+                    Disputes
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke="currentColor" stroke-width="2"/></svg>
+                    User View
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header mb-4">
+                <h1 class="fw-bold mb-1">Ownership Dispute Resolution</h1>
+                <p class="text-secondary">Examine conflicting evidence between claimants and finders to make an official determination.</p>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row g-4">
+                    <!-- Queue List -->
+                    <div class="col-lg-4">
+                        <div class="bg-white border rounded-4 overflow-hidden">
+                            <div class="p-3 bg-light border-bottom">
+                                <h6 class="fw-bold text-uppercase text-muted mb-0 small">Dispute Queue (@Model.Count)</h6>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                @foreach (var d in Model)
+                                {
+                                    var isActive = activeDispute != null && activeDispute.Id == d.Id;
+                                    <a asp-action="Disputes" asp-route-id="@d.Id" 
+                                       class="list-group-item list-group-item-action p-3 @(isActive ? "active text-white bg-primary" : "")">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <h6 class="fw-bold mb-0 text-truncate">@(d.Claim?.Item?.Title ?? $"Dispute #{d.Id}")</h6>
+                                            <span class="badge @(isActive ? "bg-light text-primary" : "bg-warning text-dark")">
+                                                @d.Status
+                                            </span>
+                                        </div>
+                                        <div class="small @(isActive ? "text-white-50" : "text-muted")">
+                                            Claimant: @(d.Claim?.Claimant?.FullName ?? "User")
+                                        </div>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Detail View -->
+                    <div class="col-lg-8">
+                        @if (activeDispute != null && activeDispute.Claim != null && activeDispute.Claim.Item != null)
+                        {
+                            var claim = activeDispute.Claim;
+                            var item = claim.Item;
+
+                            <div class="bg-white border rounded-4 overflow-hidden">
+                                <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <h5 class="fw-bold mb-1 text-danger">Dispute for: @item.Title</h5>
+                                        <span class="text-muted small">Opened on @activeDispute.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <span class="status-pill status-pending">@activeDispute.Status</span>
+                                </div>
+
+                                <div class="p-4">
+                                    <div class="row g-4 mb-4">
+                                        <!-- Claimant Column -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded-3 border h-100">
+                                                <span class="text-primary fw-bold small text-uppercase d-block mb-2">Claimant Evidence</span>
+                                                <h6 class="fw-bold mb-1">@claim.Claimant?.FullName</h6>
+                                                <p class="small text-muted mb-3">@claim.Claimant?.Email</p>
+
+                                                <div class="mb-3">
+                                                    <label class="small fw-bold text-muted d-block mb-1">Answer to Secret Question:</label>
+                                                    <div class="p-2 bg-white rounded border small fw-bold text-dark">
+                                                        "@claim.SecretAnswer"
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="small fw-bold text-muted d-block mb-1">Proof Description:</label>
+                                                    <div class="p-2 bg-white rounded border small text-secondary">
+                                                        @claim.ProofDescription
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Finder / Item Column -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded-3 border h-100">
+                                                <span class="text-success fw-bold small text-uppercase d-block mb-2">Finder's Original Report</span>
+                                                <h6 class="fw-bold mb-1">@item.User?.FullName</h6>
+                                                <p class="small text-muted mb-3">@item.User?.Email</p>
+
+                                                <div class="mb-3">
+                                                    <label class="small fw-bold text-muted d-block mb-1">Secret Question Set by Finder:</label>
+                                                    <div class="p-2 bg-white rounded border small fw-bold text-dark">
+                                                        "@(item.SecretIdentifier ?? "None specified")"
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="small fw-bold text-muted d-block mb-1">Reported Item Description:</label>
+                                                    <div class="p-2 bg-white rounded border small text-secondary">
+                                                        @item.Description
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Admin Ruling Form -->
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold mb-3">Make Final Administrative Determination</h6>
+                                        <form asp-action="ResolveDispute" method="post">
+                                            <input type="hidden" name="disputeId" value="@activeDispute.Id" />
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold">Official Resolution Notes</label>
+                                                <textarea name="notes" class="form-control-custom" rows="2" placeholder="State the reason for this administrative decision..." required></textarea>
+                                            </div>
+
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <button type="submit" name="resolution" value="@FindIt.Models.DisputeStatus.ResolvedInFavorOfClaimant" class="btn-success-custom">
+                                                    Award Item to Claimant
+                                                </button>
+                                                <button type="submit" name="resolution" value="@FindIt.Models.DisputeStatus.ResolvedInFavorOfFinder" class="btn-primary-custom">
+                                                    Rule in Favor of Finder
+                                                </button>
+                                                <button type="submit" name="resolution" value="@FindIt.Models.DisputeStatus.Dismissed" class="btn-outline-custom">
+                                                    Dismiss Dispute
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="bg-white border rounded-4 p-5 text-center">
+                    <h5 class="fw-bold mb-2">No Active Disputes</h5>
+                    <p class="text-muted mb-0">All ownership claims are currently operating without conflicting disputes.</p>
+                </div>
+            }
+        </main>
+    </div>
+</div>

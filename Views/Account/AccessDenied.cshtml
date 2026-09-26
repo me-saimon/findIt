@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container py-5 text-center" style="max-width: 500px;">
+    <div class="form-card py-5">
+        <div class="text-danger mb-3">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <h2 class="fw-bold mb-2">Access Denied</h2>
+        <p class="text-secondary mb-4">You do not have the required administrative permissions to access this area.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn-primary-custom px-4">Return to Home</a>
+    </div>
+</div>

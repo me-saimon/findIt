@@ -1,0 +1,118 @@
+@model List<FindIt.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Messages";
+    var activePartner = ViewBag.ActivePartner as FindIt.Models.ApplicationUser;
+    var activeThread = ViewBag.ActiveThread as List<FindIt.Models.Message> ?? new List<FindIt.Models.Message>();
+    string currentUserId = ViewBag.CurrentUserId ?? "";
+    int? activeItemId = ViewBag.ActiveItemId;
+}
+
+<div class="container py-3">
+    <div class="chat-container">
+        <!-- Conversations Sidebar -->
+        <div class="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <h3 class="fw-bold mb-0">Messages</h3>
+            </div>
+
+            <div class="conversation-list">
+                @if (Model.Any())
+                {
+                    @foreach (var user in Model)
+                    {
+                        var isActive = activePartner != null && activePartner.Id == user.Id;
+                        <a asp-action="Index" asp-route-otherUserId="@user.Id" 
+                           class="conversation-item @(isActive ? "active" : "")">
+                            <div class="conv-avatar">
+                                @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
+                            </div>
+                            <div class="conv-info">
+                                <div class="conv-top-row">
+                                    <h6 class="conv-name">@user.FullName</h6>
+                                </div>
+                                <div class="conv-msg">@user.DepartmentOrRole</div>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted small">
+                        No conversations yet. You can message finders or claimants directly from item pages!
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Active Chat Window -->
+        <div class="chat-window">
+            <div class="chat-window-inner">
+                @if (activePartner != null)
+                {
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <div class="conv-avatar" style="width: 36px; height: 36px;">
+                                @(activePartner.FullName.Length > 0 ? activePartner.FullName[0].ToString().ToUpper() : "U")
+                            </div>
+                            <div>
+                                <h5 class="chat-header h4 mb-0">@activePartner.FullName</h5>
+                                <span class="small text-muted">@activePartner.DepartmentOrRole</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Scroll Area -->
+                    <div class="messages-area" id="messagesArea">
+                        @if (activeThread.Any())
+                        {
+                            @foreach (var msg in activeThread)
+                            {
+                                var isSentByMe = msg.SenderId == currentUserId;
+                                <div class="msg-bubble @(isSentByMe ? "msg-sent" : "msg-received")">
+                                    <p>@msg.Content</p>
+                                    <span class="msg-time">@msg.SentAt.ToString("hh:mm tt")</span>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center my-auto text-muted small">
+                                Start the conversation with @activePartner.FullName regarding lost & found items.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Chat Input Area -->
+                    <div class="chat-input-area">
+                        <form asp-action="Send" method="post" class="input-wrapper">
+                            <input type="hidden" name="receiverId" value="@activePartner.Id" />
+                            <input type="hidden" name="itemId" value="@activeItemId" />
+                            <input type="text" name="content" class="chat-input" placeholder="Type a message..." required autocomplete="off" />
+                            <button type="submit" class="send-btn">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="m-auto text-center text-muted p-5">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" class="mb-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#CBD5E1" stroke-width="2"/></svg>
+                        <h5>No Conversation Selected</h5>
+                        <p class="small">Choose a contact from the sidebar or click "Message Finder" from any item listing.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const area = document.getElementById('messagesArea');
+        if (area) {
+            area.scrollTop = area.scrollHeight;
+        }
+    </script>
+}

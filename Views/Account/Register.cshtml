@@ -1,0 +1,64 @@
+@model FindIt.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="container py-5" style="max-width: 520px;">
+    <div class="form-card">
+        <div class="text-center mb-4">
+            <a asp-controller="Home" asp-action="Index" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-3">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span class="fs-4 fw-bold">FindIt</span>
+            </a>
+            <h2 class="fw-bold mb-1">Create an Account</h2>
+            <p class="text-secondary small">Join the campus lost and found community.</p>
+        </div>
+
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+            <div class="form-group">
+                <label asp-for="FullName" class="form-label">Full Name</label>
+                <input asp-for="FullName" class="form-control-custom" placeholder="e.g., Alex Johnson" required />
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">Campus / Email Address</label>
+                <input asp-for="Email" class="form-control-custom" placeholder="alex@campus.edu" required />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="DepartmentOrRole" class="form-label">Department / Campus Role</label>
+                <input asp-for="DepartmentOrRole" class="form-control-custom" placeholder="e.g., Computer Science, Engineering, Staff" />
+                <span asp-validation-for="DepartmentOrRole" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-6 form-group mb-0">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control-custom" placeholder="Min. 6 characters" required />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group mb-0">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" class="form-control-custom" placeholder="Repeat password" required />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary-custom w-100 py-2 mb-3 mt-4">
+                Create Account
+            </button>
+
+            <div class="text-center small text-secondary">
+                Already registered? 
+                <a asp-action="Login" class="fw-semibold text-primary text-decoration-none">Sign In</a>
+            </div>
+        </form>
+    </div>
+</div>

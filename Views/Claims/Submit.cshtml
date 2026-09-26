@@ -1,0 +1,94 @@
+@model FindIt.Models.ViewModels.ClaimSubmissionViewModel
+@{
+    ViewData["Title"] = "Submit Ownership Claim";
+}
+
+<div class="container py-4" style="max-width: 750px;">
+    <!-- Breadcrumbs -->
+    <nav class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Items" asp-action="Browse">Browse</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Items" asp-action="Details" asp-route-id="@Model.ItemId">@Model.ItemTitle</a></li>
+            <li class="breadcrumb-item active">Submit Claim</li>
+        </ol>
+    </nav>
+
+    <!-- Item Summary Header -->
+    <div class="bg-white border rounded-4 p-4 mb-4 d-flex align-items-center gap-3">
+        <div class="item-thumb" style="width: 56px; height: 56px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#CBD5E1" stroke-width="2"/><path d="M21 15l-5-5L5 21" stroke="#CBD5E1" stroke-width="2"/></svg>
+        </div>
+        <div>
+            <span class="text-success small fw-bold text-uppercase">Claiming Item</span>
+            <h4 class="fw-bold mb-0">@Model.ItemTitle</h4>
+            <span class="text-muted small">Found at: @Model.ItemLocation</span>
+        </div>
+    </div>
+
+    <!-- Security Info Callout -->
+    <div class="security-callout">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+        <div>
+            <strong>Proof of Ownership Process:</strong>
+            To protect users from fraudulent claims, provide identifying details only the true owner would know. The finder will review your response before releasing the item.
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <form asp-action="Submit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="ItemId" />
+            <input type="hidden" asp-for="ItemTitle" />
+            <input type="hidden" asp-for="ItemLocation" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            @if (!string.IsNullOrEmpty(Model.SecretQuestionPrompt))
+            {
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <label class="form-label text-primary fw-bold mb-1">Finder's Verification Question:</label>
+                    <p class="fst-italic mb-2 text-dark">"@Model.SecretQuestionPrompt"</p>
+
+                    <label asp-for="SecretAnswer" class="form-label">
+                        Your Answer <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="SecretAnswer" class="form-control-custom" placeholder="Provide the exact answer or detail requested..." />
+                    <span asp-validation-for="SecretAnswer" class="text-danger small"></span>
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label asp-for="SecretAnswer" class="form-label">
+                        Unique Identifying Features <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="SecretAnswer" class="form-control-custom" placeholder="e.g., Lock screen photo, scratch on bottom left, specific keychain attached" />
+                    <span asp-validation-for="SecretAnswer" class="text-danger small"></span>
+                </div>
+            }
+
+            <!-- Proof Description -->
+            <div class="form-group">
+                <label asp-for="ProofDescription" class="form-label">
+                    Proof Description / Circumstances <span class="text-danger">*</span>
+                </label>
+                <textarea asp-for="ProofDescription" class="form-control-custom" rows="4" 
+                          placeholder="Explain when and where you lost it, contents inside, purchase details, serial numbers, or any other proof..."></textarea>
+                <span asp-validation-for="ProofDescription" class="text-danger small"></span>
+            </div>
+
+            <!-- Optional Image Upload (Receipt or Proof) -->
+            <div class="form-group mb-4">
+                <label class="form-label">Upload Receipt, Invoice or Past Photo (Optional)</label>
+                <input type="file" asp-for="ProofImageFile" class="form-control form-control-sm rounded-3" accept="image/*" />
+                <small class="text-muted">A purchase receipt, old photo of you with the item, or box photo.</small>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                <a asp-controller="Items" asp-action="Details" asp-route-id="@Model.ItemId" class="btn-outline-custom">Cancel</a>
+                <button type="submit" class="btn-primary-custom px-4">Submit Ownership Claim</button>
+            </div>
+        </form>
+    </div>
+</div>

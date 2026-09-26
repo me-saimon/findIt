@@ -1,0 +1,94 @@
+@model FindIt.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Account Settings";
+}
+
+<div class="container py-4">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav">
+            <ul>
+                <li><a asp-controller="Dashboard" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                    Dashboard
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="MyReports" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/></svg>
+                    My Reports
+                </a></li>
+                <li><a asp-controller="Claims" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/></svg>
+                    My Claims
+                </a></li>
+                <li><a asp-controller="Messages" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2"/></svg>
+                    Messages
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="Settings" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+                    Settings
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header mb-4">
+                <h1 class="fw-bold mb-1">Account Settings</h1>
+                <p class="text-secondary">Update your profile information and security credentials.</p>
+            </div>
+
+            <!-- Profile Info Form -->
+            <div class="form-card mb-4">
+                <h4 class="fw-bold mb-3">Personal Information</h4>
+                <form asp-action="UpdateProfile" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="fullName" value="@Model.FullName" class="form-control-custom" required />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Email Address (Account ID)</label>
+                            <input type="email" value="@Model.Email" class="form-control-custom bg-light" readonly disabled />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Department / Campus Role</label>
+                            <input type="text" name="departmentOrRole" value="@Model.DepartmentOrRole" class="form-control-custom" placeholder="e.g., Computer Science, Staff, Admin" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Phone Number (Optional)</label>
+                            <input type="tel" name="phoneNumber" value="@Model.PhoneNumber" class="form-control-custom" placeholder="e.g., +1 555-0199" />
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn-primary-custom">Save Profile Changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security / Password Form -->
+            <div class="form-card">
+                <h4 class="fw-bold mb-3">Change Password</h4>
+                <form asp-action="ChangePassword" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control-custom" required />
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-control-custom" required />
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" class="form-control-custom" required />
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn-outline-custom">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>

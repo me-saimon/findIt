@@ -1,0 +1,97 @@
+@model List<FindIt.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container py-4">
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar-nav">
+            <ul>
+                <li><a asp-controller="Admin" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                    Overview
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Users" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/></svg>
+                    Users
+                </a></li>
+                <li><a asp-controller="Admin" asp-action="Disputes" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/></svg>
+                    Disputes
+                </a></li>
+                <li><a asp-controller="Dashboard" asp-action="Index" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke="currentColor" stroke-width="2"/></svg>
+                    User View
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header mb-4">
+                <h1 class="fw-bold mb-1">User Management</h1>
+                <p class="text-secondary">View registered campus members, monitor activity, and manage access.</p>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User Details</th>
+                            <th>Role / Dept</th>
+                            <th>Items Reported</th>
+                            <th>Claims Submitted</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            var isSuspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-thumb">
+                                            @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
+                                        </div>
+                                        <div>
+                                            <div class="user-name-cell">@user.FullName</div>
+                                            <div class="user-email-cell">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @(user.DepartmentOrRole ?? "Student")
+                                    </span>
+                                </td>
+                                <td>@user.ReportedItems.Count</td>
+                                <td>@user.SubmittedClaims.Count</td>
+                                <td>
+                                    <span class="status-pill @(isSuspended ? "status-suspended" : "status-active")">
+                                        @(isSuspended ? "Suspended" : "Active")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="ToggleUserStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        @if (isSuspended)
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">Reactivate</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Suspend this user account?');">Suspend</button>
+                                        }
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>

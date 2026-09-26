@@ -1,0 +1,210 @@
+@using Microsoft.AspNetCore.Identity
+@using FindIt.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FindIt | Smart Lost & Found</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                FindIt
+                @if (User.IsInRole("Admin"))
+                {
+                    <span class="badge bg-dark ms-1" style="font-size: 0.6rem; padding: 0.2rem 0.4rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Admin</span>
+                }
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" 
+                           asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Browse" ? "active" : "")" 
+                           asp-controller="Items" asp-action="Browse">Browse</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Create" ? "active" : "")" 
+                           asp-controller="Items" asp-action="Create">Report Item</a>
+                    </li>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")" 
+                               asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Messages" ? "active" : "")" 
+                               asp-controller="Messages" asp-action="Index">Messages</a>
+                        </li>
+                    }
+
+                    <!-- All Pages Quick Switcher for Demo -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            All Pages
+                        </a>
+                        <ul class="dropdown-menu shadow-sm border-0">
+                            <li><h6 class="dropdown-header">Public Pages</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Home / Landing</a></li>
+                            <li><a class="dropdown-item" asp-controller="Items" asp-action="Browse">Browse Items</a></li>
+                            <li><a class="dropdown-item" asp-controller="Items" asp-action="Create">Report Item</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">User Portal</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="MyReports">My Reports</a></li>
+                            <li><a class="dropdown-item" asp-controller="Claims" asp-action="Index">My Claims</a></li>
+                            <li><a class="dropdown-item" asp-controller="Messages" asp-action="Index">Messages Chat</a></li>
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Settings">Account Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Admin Control</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Admin Overview</a></li>
+                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">User Management</a></li>
+                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Disputes">Dispute Resolution</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Authentication</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Login">Sign In</a></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Register">Sign Up</a></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ForgotPassword">Forgot Password</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Auth Widget -->
+                <div class="d-flex align-items-center gap-2">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        var displayName = currentUser?.FullName ?? User.Identity?.Name ?? "User";
+                        var firstLetter = string.IsNullOrEmpty(displayName) ? "U" : displayName.Substring(0, 1).ToUpper();
+
+                        <div class="dropdown">
+                            <div class="user-profile" data-bs-toggle="dropdown" role="button">
+                                <div class="user-avatar @(User.IsInRole("Admin") ? "admin" : "")">@firstLetter</div>
+                                <div class="d-none d-lg-block">
+                                    <div class="user-name">@displayName</div>
+                                    <div class="user-role">@(User.IsInRole("Admin") ? "Administrator" : (currentUser?.DepartmentOrRole ?? "Student"))</div>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--text-muted);"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2" style="border-radius: 12px; min-width: 200px;">
+                                <li class="px-3 py-2 border-bottom">
+                                    <span class="d-block text-muted" style="font-size: 0.75rem;">Signed in as</span>
+                                    <strong class="d-block text-truncate" style="font-size: 0.85rem;">@User.Identity?.Name</strong>
+                                </li>
+                                <li><a class="dropdown-item py-2" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Dashboard" asp-action="MyReports">My Reports</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Claims" asp-action="Index">My Claims</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Dashboard" asp-action="Settings">Settings</a></li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-primary fw-bold" asp-controller="Admin" asp-action="Index">Admin Portal</a></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item py-2 text-danger">Sign Out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn-outline-custom">Log In</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn-primary-custom">Sign Up</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main role="main">
+        <div class="container mt-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
+                    <strong>Success!</strong> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
+                    <strong>Error!</strong> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
+                    @TempData["InfoMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+        @RenderBody()
+    </main>
+
+    <!-- Site Footer -->
+    <footer>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <div class="d-inline-flex align-items-center gap-2 mb-1">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M21 21L16.65 16.65" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                        <strong>FindIt</strong> &mdash; Centralized Lost & Found Portal
+                    </div>
+                    <p class="mb-0 text-muted" style="font-size: 0.8rem;">
+                        CSE 4106 Software Development Project &bull; Built with ASP.NET Core 10 MVC
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a asp-controller="Home" asp-action="Index" class="footer-link">Home</a>
+                    <a asp-controller="Items" asp-action="Browse" class="footer-link">Browse</a>
+                    <a asp-controller="Items" asp-action="Create" class="footer-link">Report Item</a>
+                    <a asp-controller="Admin" asp-action="Index" class="footer-link">Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
