@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FindIt.Data;
 using FindIt.Models;
+using FindIt.Models.ViewModels;
 
 namespace FindIt.Controllers;
 
@@ -25,8 +26,8 @@ public class MessagesController : Controller
         var currentUserId = _userManager.GetUserId(User);
         if (currentUserId == null) return Challenge();
 
-        // Find all users current user has chatted with
-        var userMessages = await _context.Messages
+        // Find all messages involving the current user
+        var allUserMessages = await _context.Messages
             .Include(m => m.Sender)
             .Include(m => m.Receiver)
             .Include(m => m.Item)
@@ -34,26 +35,81 @@ public class MessagesController : Controller
             .OrderByDescending(m => m.SentAt)
             .ToListAsync();
 
-        // Distinct conversation partners
-        var conversationPartners = userMessages
-            .Select(m => m.SenderId == currentUserId ? m.Receiver : m.Sender)
-            .Where(u => u != null)
-            .DistinctBy(u => u!.Id)
+        // Extract partner user IDs
+        var partnerIds = allUserMessages
+            .Select(m => m.SenderId == currentUserId ? m.ReceiverId : m.SenderId)
+            .Where(id => !string.IsNullOrEmpty(id) && id != currentUserId)
+            .Distinct()
             .ToList();
 
-        // If otherUserId passed (e.g. from "Send Message" on Item Details)
-        if (!string.IsNullOrEmpty(otherUserId) && !conversationPartners.Any(u => u!.Id == otherUserId))
+        // If otherUserId passed (e.g. from "Send Message" on Item Details) and not in existing conversations
+        if (!string.IsNullOrEmpty(otherUserId) && otherUserId != currentUserId && !partnerIds.Contains(otherUserId))
         {
-            var targetUser = await _userManager.FindByIdAsync(otherUserId);
-            if (targetUser != null)
-            {
-                conversationPartners.Insert(0, targetUser);
-            }
+            partnerIds.Insert(0, otherUserId);
         }
 
-        var activePartner = !string.IsNullOrEmpty(otherUserId)
-            ? conversationPartners.FirstOrDefault(u => u!.Id == otherUserId)
-            : conversationPartners.FirstOrDefault();
+        // Fetch partner user objects
+        var partnerUsers = await _userManager.Users
+            .Where(u => partnerIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id);
+
+        // Fetch active item if specified
+        Item? activeItem = null;
+        if (itemId.HasValue)
+        {
+            activeItem = await _context.Items
+                .Include(i => i.Category)
+                .Include(i => i.User)
+                .FirstOrDefaultAsync(i => i.Id == itemId.Value);
+        }
+
+        // Build rich conversation list items
+        var conversations = new List<ConversationListItem>();
+        foreach (var pid in partnerIds)
+        {
+            if (!partnerUsers.TryGetValue(pid, out var partner)) continue;
+
+            var threadMsgs = allUserMessages
+                .Where(m => (m.SenderId == currentUserId && m.ReceiverId == pid) ||
+                            (m.SenderId == pid && m.ReceiverId == currentUserId))
+                .OrderBy(m => m.SentAt)
+                .ToList();
+
+            var lastMsg = threadMsgs.LastOrDefault();
+            var unreadCount = threadMsgs.Count(m => m.SenderId == pid && m.ReceiverId == currentUserId && !m.IsRead);
+            var relatedItem = threadMsgs.LastOrDefault(m => m.Item != null)?.Item;
+            if (relatedItem == null && pid == otherUserId && activeItem != null)
+            {
+                relatedItem = activeItem;
+            }
+
+            conversations.Add(new ConversationListItem
+            {
+                Partner = partner,
+                LastMessageContent = lastMsg?.Content,
+                LastMessageTime = lastMsg?.SentAt,
+                IsLastMessageFromMe = lastMsg?.SenderId == currentUserId,
+                UnreadCount = unreadCount,
+                RelatedItem = relatedItem
+            });
+        }
+
+        // Order conversations: if new conversation with no messages yet, keep it at top, else order by last message time
+        conversations = conversations
+            .OrderByDescending(c => c.Partner.Id == otherUserId && c.LastMessageTime == null ? 1 : 0)
+            .ThenByDescending(c => c.LastMessageTime ?? DateTime.MinValue)
+            .ToList();
+
+        // Determine active partner
+        ApplicationUser? activePartner = null;
+        if (!string.IsNullOrEmpty(otherUserId) && partnerUsers.TryGetValue(otherUserId, out var requestedPartner))
+        {
+            activePartner = requestedPartner;
+        }
+        else if (conversations.Any())
+        {
+            activePartner = conversations.First().Partner;
+        }
 
         var activeThread = new List<Message>();
         if (activePartner != null)
@@ -72,15 +128,36 @@ public class MessagesController : Controller
             {
                 unread.ForEach(m => m.IsRead = true);
                 await _context.SaveChangesAsync();
+
+                var activeConv = conversations.FirstOrDefault(c => c.Partner.Id == activePartner.Id);
+                if (activeConv != null) activeConv.UnreadCount = 0;
+            }
+
+            // If active item wasn't explicitly passed, check if activeThread has an item
+            if (activeItem == null)
+            {
+                var lastItemMsg = activeThread.LastOrDefault(m => m.ItemId != null);
+                if (lastItemMsg?.ItemId != null)
+                {
+                    activeItem = await _context.Items
+                        .Include(i => i.Category)
+                        .Include(i => i.User)
+                        .FirstOrDefaultAsync(i => i.Id == lastItemMsg.ItemId.Value);
+                }
             }
         }
 
-        ViewBag.ActivePartner = activePartner;
-        ViewBag.ActiveThread = activeThread;
-        ViewBag.CurrentUserId = currentUserId;
-        ViewBag.ActiveItemId = itemId;
+        var viewModel = new MessagesViewModel
+        {
+            Conversations = conversations,
+            ActivePartner = activePartner,
+            ActiveThread = activeThread,
+            CurrentUserId = currentUserId,
+            ActiveItemId = activeItem?.Id ?? itemId,
+            ActiveItem = activeItem
+        };
 
-        return View(conversationPartners);
+        return View(viewModel);
     }
 
     // POST: /Messages/Send
@@ -110,3 +187,4 @@ public class MessagesController : Controller
         return RedirectToAction(nameof(Index), new { otherUserId = receiverId, itemId });
     }
 }
+

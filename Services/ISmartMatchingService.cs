@@ -7,6 +7,7 @@ public class MatchResult
     public Item CandidateItem { get; set; } = null!;
     public int Score { get; set; }
     public string Reason { get; set; } = string.Empty;
+    public bool IsAiPowered { get; set; } = false;
 }
 
 public interface ISmartMatchingService

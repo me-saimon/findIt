@@ -140,3 +140,24 @@ public class ForgotPasswordViewModel
     [Required, EmailAddress]
     public string Email { get; set; } = string.Empty;
 }
+
+public class ConversationListItem
+{
+    public ApplicationUser Partner { get; set; } = null!;
+    public string? LastMessageContent { get; set; }
+    public DateTime? LastMessageTime { get; set; }
+    public bool IsLastMessageFromMe { get; set; }
+    public int UnreadCount { get; set; }
+    public Item? RelatedItem { get; set; }
+}
+
+public class MessagesViewModel
+{
+    public List<ConversationListItem> Conversations { get; set; } = new();
+    public ApplicationUser? ActivePartner { get; set; }
+    public List<Message> ActiveThread { get; set; } = new();
+    public string CurrentUserId { get; set; } = string.Empty;
+    public int? ActiveItemId { get; set; }
+    public Item? ActiveItem { get; set; }
+}
+

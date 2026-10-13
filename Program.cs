@@ -36,6 +36,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISmartMatchingService, SmartMatchingService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 

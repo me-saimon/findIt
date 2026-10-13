@@ -127,10 +127,44 @@ public class ClaimsController : Controller
         return View(model);
     }
 
+    // GET: /Claims/Details/5
+    public async Task<IActionResult> Details(int id)
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null) return Challenge();
+
+        var claim = await _context.Claims
+            .Include(c => c.Claimant)
+            .Include(c => c.Item)
+                .ThenInclude(i => i!.Category)
+            .Include(c => c.Item)
+                .ThenInclude(i => i!.User)
+            .Include(c => c.Dispute)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (claim == null) return NotFound();
+
+        bool isClaimant = claim.ClaimantId == userId;
+        bool isFinder = claim.Item != null && claim.Item.UserId == userId;
+        bool isAdmin = User.IsInRole("Admin");
+
+        if (!isClaimant && !isFinder && !isAdmin)
+        {
+            return Forbid();
+        }
+
+        ViewBag.IsClaimant = isClaimant;
+        ViewBag.IsFinder = isFinder;
+        ViewBag.IsAdmin = isAdmin;
+        ViewBag.CurrentUserId = userId;
+
+        return View(claim);
+    }
+
     // POST: /Claims/Review
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Review(int claimId, ClaimStatus status, string? reviewNotes)
+    public async Task<IActionResult> Review(int claimId, ClaimStatus status, string? reviewNotes, string? returnUrl = null)
     {
         var userId = _userManager.GetUserId(User);
         var claim = await _context.Claims
@@ -156,7 +190,56 @@ public class ClaimsController : Controller
 
         await _context.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = $"Claim has been marked as {status}.";
-        return RedirectToAction(nameof(Index));
+        TempData["SuccessMessage"] = $"Claim #{claim.Id:D5} status has been updated to {status}.";
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction(nameof(Details), new { id = claimId });
+    }
+
+    // POST: /Claims/Dispute
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Dispute(int claimId, string reason)
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null) return Challenge();
+
+        var claim = await _context.Claims
+            .Include(c => c.Dispute)
+            .FirstOrDefaultAsync(c => c.Id == claimId);
+
+        if (claim == null) return NotFound();
+        if (claim.ClaimantId != userId && !User.IsInRole("Admin")) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["ErrorMessage"] = "Please provide an explanation to file a dispute.";
+            return RedirectToAction(nameof(Details), new { id = claimId });
+        }
+
+        if (claim.Dispute != null)
+        {
+            TempData["InfoMessage"] = "A dispute has already been filed for this claim.";
+            return RedirectToAction(nameof(Details), new { id = claimId });
+        }
+
+        var dispute = new Dispute
+        {
+            ClaimId = claimId,
+            Reason = reason.Trim(),
+            Status = DisputeStatus.Pending,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        claim.Status = ClaimStatus.Disputed;
+        _context.Disputes.Add(dispute);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Your dispute has been logged. Our moderation team will review this case shortly.";
+        return RedirectToAction(nameof(Details), new { id = claimId });
     }
 }
